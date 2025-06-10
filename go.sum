@@ -152,6 +152,8 @@ github.com/steadybit/event-kit/go/event_kit_api v1.6.0 h1:MZbVVLOPQn46enR3RjWglg
 github.com/steadybit/event-kit/go/event_kit_api v1.6.0/go.mod h1:XKfKcyouAOPW3TVr4sT253kJI9rYlzfy5yER1r7p8VU=
 github.com/steadybit/extension-kit v1.10.0 h1:sOeMsGwYT+9v+U+tzUxy6xLMEH2h2qVw3uzgTWhnNpk=
 github.com/steadybit/extension-kit v1.10.0/go.mod h1:Ow1kVKhBQwLGOrBRPSdGDDVdVBgaMDFjpxPV3FeoHho=
+github.com/steadybit/extension-scaffold v0.0.0-20250609190015-9ccc0ef26e79 h1:rByucJNU8FKU5BBNQkQHMFebkrGLuV1tz+hSuV/POLA=
+github.com/steadybit/extension-scaffold v0.0.0-20250609190015-9ccc0ef26e79/go.mod h1:SEW1IQmlalXbZFCsnnoujG1CjqCNaZx5HkFJdB84YhE=
 github.com/steadybit/preflight-kit/go/preflight_kit_api v1.0.1 h1:CmAm283j4bc0oiW+6hNMkzyr35rdubt8UeeCPf7kauw=
 github.com/steadybit/preflight-kit/go/preflight_kit_api v1.0.1/go.mod h1:5il4muKKDgJwuzU1Sq//eVJh1OywFZx0L7bHM71f+Bg=
 github.com/steadybit/preflight-kit/go/preflight_kit_sdk v1.0.0 h1:GPlevOSpOkaXOzXsCaug9LMsDxPOYM7/3NajMG4krSA=

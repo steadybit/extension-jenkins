@@ -9,23 +9,16 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
-	"github.com/steadybit/advice-kit/go/advice_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
-	"github.com/steadybit/event-kit/go/event_kit_api"
+	"github.com/steadybit/extension-jenkins/config"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/exthealth"
 	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extlogging"
 	"github.com/steadybit/extension-kit/extruntime"
 	"github.com/steadybit/extension-kit/extsignals"
-	"github.com/steadybit/extension-scaffold/config"
-	"github.com/steadybit/extension-scaffold/extadvice/robot_maintenance"
-	"github.com/steadybit/extension-scaffold/extevents"
-	"github.com/steadybit/extension-scaffold/extpreflight"
 	"github.com/steadybit/extension-scaffold/extrobots"
-	"github.com/steadybit/preflight-kit/go/preflight_kit_api"
-	"github.com/steadybit/preflight-kit/go/preflight_kit_sdk"
 	_ "go.uber.org/automaxprocs" // Importing automaxprocs automatically adjusts GOMAXPROCS.
 )
 
@@ -52,7 +45,7 @@ func main() {
 	//This will start /health/liveness and /health/readiness endpoints on port 8081 for use with kubernetes
 	//The port can be configured using the STEADYBIT_EXTENSION_HEALTH_PORT environment variable
 	exthealth.SetReady(false)
-	exthealth.StartProbes(8081)
+	exthealth.StartProbes(8083)
 
 	// This call registers a handler for the extension's root path. This is the path initially accessed
 	// by the Steadybit agent to obtain the extension's capabilities.
@@ -63,19 +56,12 @@ func main() {
 	// you do not have a need for all of them.
 	discovery_kit_sdk.Register(extrobots.NewRobotDiscovery())
 	action_kit_sdk.RegisterAction(extrobots.NewLogAction())
-	extevents.RegisterEventListenerHandlers()
-
-	// Register the handler for the advice endpoint
-	exthttp.RegisterHttpHandler("/advice/robot-maintenance", exthttp.GetterAsHandler(robot_maintenance.GetAdviceDescriptionRobotMaintenance))
 
 	//This will install a signal handlder, that will stop active actions when receiving a SIGURS1, SIGTERM or SIGINT
 	extsignals.ActivateSignalHandlers()
 
 	//This will register the coverage endpoints for the extension (used by action_kit_test)
 	action_kit_sdk.RegisterCoverageEndpoints()
-
-	preflight_kit_sdk.RegisterPreflight(extpreflight.NewSimplePreflight())
-	preflight_kit_sdk.RegisterPreflight(extpreflight.NewMaintenanceWindowPreflight())
 
 	//This will switch the readiness state of the application to true.
 	exthealth.SetReady(true)
@@ -85,7 +71,7 @@ func main() {
 		// The port can be configured externally through the
 		// STEADYBIT_EXTENSION_PORT environment variable.
 		// We suggest that you keep port 8080 as the default.
-		Port: 8080,
+		Port: 8082,
 	})
 }
 
@@ -94,48 +80,11 @@ func main() {
 type ExtensionListResponse struct {
 	action_kit_api.ActionList       `json:",inline"`
 	discovery_kit_api.DiscoveryList `json:",inline"`
-	event_kit_api.EventListenerList `json:",inline"`
-	advice_kit_api.AdviceList       `json:",inline"`
-	preflight_kit_api.PreflightList `json:",inline"`
 }
 
 func getExtensionList() ExtensionListResponse {
 	return ExtensionListResponse{
-		// See this document to learn more about the action list:
-		// https://github.com/steadybit/action-kit/blob/main/docs/action-api.md#action-list
-		ActionList: action_kit_sdk.GetActionList(),
-
-		// See this document to learn more about the discovery list:
-		// https://github.com/steadybit/discovery-kit/blob/main/docs/discovery-api.md#index-response
+		ActionList:    action_kit_sdk.GetActionList(),
 		DiscoveryList: discovery_kit_sdk.GetDiscoveryList(),
-
-		// See this document to learn more about the event listener list:
-		// https://github.com/steadybit/event-kit/blob/main/docs/event-api.md#event-listeners-list
-		EventListenerList: extevents.GetEventListenerList(),
-
-		// See this document to learn more about the advice list:
-		// https://github.com/steadybit/advice-kit/blob/main/docs/advice-api.md#index-response
-		AdviceList: advice_kit_api.AdviceList{
-			Advice: getAdviceRefs(),
-		},
-
-		// See this document to learn more about the preflight list:
-		// https://github.com/steadybit/preflight-kit/main/docs/preflight-api.md#index-response
-		PreflightList: preflight_kit_sdk.GetPreflightList(),
 	}
-}
-
-func getAdviceRefs() []advice_kit_api.DescribingEndpointReference {
-	var refs []advice_kit_api.DescribingEndpointReference
-	refs = make([]advice_kit_api.DescribingEndpointReference, 0)
-	for _, adviceId := range config.Config.ActiveAdviceList {
-		// Maintenance advice
-		if adviceId == "*" || adviceId == robot_maintenance.RobotMaintenanceID {
-			refs = append(refs, advice_kit_api.DescribingEndpointReference{
-				Method: "GET",
-				Path:   "/advice/robot-maintenance",
-			})
-		}
-	}
-	return refs
 }

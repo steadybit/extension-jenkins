@@ -1,4 +1,4 @@
-module github.com/steadybit/extension-scaffold
+module github.com/steadybit/extension-jenkins
 
 go 1.24.0
 
@@ -6,21 +6,16 @@ toolchain go1.24.1
 
 require (
 	github.com/KimMachineGun/automemlimit v0.7.2
-	github.com/google/uuid v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/rs/zerolog v1.34.0
 	github.com/steadybit/action-kit/go/action_kit_api/v2 v2.10.0
 	github.com/steadybit/action-kit/go/action_kit_sdk v1.2.0
 	github.com/steadybit/action-kit/go/action_kit_test v1.4.2
-	github.com/steadybit/advice-kit/go/advice_kit_api v1.2.0
 	github.com/steadybit/discovery-kit/go/discovery_kit_api v1.7.0
-	github.com/steadybit/discovery-kit/go/discovery_kit_commons v0.3.0
 	github.com/steadybit/discovery-kit/go/discovery_kit_sdk v1.3.0
 	github.com/steadybit/discovery-kit/go/discovery_kit_test v1.2.0
-	github.com/steadybit/event-kit/go/event_kit_api v1.6.0
 	github.com/steadybit/extension-kit v1.10.0
-	github.com/steadybit/preflight-kit/go/preflight_kit_api v1.0.1
-	github.com/steadybit/preflight-kit/go/preflight_kit_sdk v1.0.0
+	github.com/steadybit/extension-scaffold v0.0.0-20250609190015-9ccc0ef26e79
 	github.com/stretchr/testify v1.10.0
 	go.uber.org/automaxprocs v1.6.0
 )
@@ -41,6 +36,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/gnostic-models v0.6.9 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -63,6 +59,7 @@ require (
 	github.com/prometheus/procfs v0.16.1 // indirect
 	github.com/rs/xid v1.6.0 // indirect
 	github.com/spf13/pflag v1.0.6 // indirect
+	github.com/steadybit/discovery-kit/go/discovery_kit_commons v0.3.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/yalp/jsonpath v0.0.0-20180802001716-5cc68e5049a0 // indirect
 	github.com/zmwangx/debounce v1.0.0 // indirect

@@ -5,7 +5,6 @@ package e2e
 
 import (
 	"context"
-	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/action-kit/go/action_kit_test/e2e"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_test/validate"
@@ -17,12 +16,11 @@ import (
 
 func TestWithMinikube(t *testing.T) {
 	extFactory := e2e.HelmExtensionFactory{
-		Name: "extension-scaffold",
+		Name: "extension-jenkins",
 		Port: 8080,
 		ExtraArgs: func(m *e2e.Minikube) []string {
 			return []string{
 				"--set", "logging.level=debug",
-				"--set", "discovery.attributes.excludes.robot={robot.tags.*}",
 			}
 		},
 	}
@@ -35,10 +33,6 @@ func TestWithMinikube(t *testing.T) {
 		{
 			Name: "target discovery",
 			Test: testDiscovery,
-		},
-		{
-			Name: "run scaffold",
-			Test: testRunscaffold,
 		},
 	})
 }
@@ -59,18 +53,4 @@ func testDiscovery(t *testing.T, _ *e2e.Minikube, e *e2e.Extension) {
 	assert.Equal(t, target.TargetType, "com.steadybit.extension_scaffold.robot")
 	assert.Equal(t, target.Attributes["robot.reportedBy"], []string{"extension-scaffold"})
 	assert.NotContains(t, target.Attributes, "robot.tags.firstTag")
-}
-
-func testRunscaffold(t *testing.T, m *e2e.Minikube, e *e2e.Extension) {
-	config := struct {
-		Duration int `json:"duration"`
-	}{
-		Duration: 3000,
-	}
-	exec, err := e.RunAction("com.steadybit.extension_scaffold.robot.log", &action_kit_api.Target{
-		Name: "robot",
-	}, config, nil)
-	require.NoError(t, err)
-	e2e.AssertLogContains(t, m, e.Pod, "Logging in log action **start**")
-	require.NoError(t, exec.Cancel())
 }
