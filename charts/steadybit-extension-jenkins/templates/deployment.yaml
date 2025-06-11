@@ -55,6 +55,15 @@ spec:
               memory: {{ .Values.resources.limits.memory }}
               cpu: {{ .Values.resources.limits.cpu }}
           env:
+            - name: STEADYBIT_EXTENSION_BASE_URL
+              value: {{ .Values.jenkins.baseUrl }}
+            - name: STEADYBIT_EXTENSION_API_USER
+              value: {{ .Values.jenkins.apiUser }}
+            - name: STEADYBIT_EXTENSION_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "jenkins.secret.name" . }}
+                  key: api-token
             {{- include "extensionlib.deployment.env" (list .) | nindent 12 }}
             {{- with .Values.extraEnv }}
               {{- toYaml . | nindent 12 }}
@@ -73,7 +82,7 @@ spec:
             failureThreshold: {{ .Values.probes.liveness.failureThreshold }}
             httpGet:
               path: /health/liveness
-              port: 8081
+              port: 8083
           readinessProbe:
             initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds }}
             periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
@@ -82,7 +91,7 @@ spec:
             failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
             httpGet:
               path: /health/readiness
-              port: 8081
+              port: 8083
           {{- with .Values.containerSecurityContext }}
           securityContext:
           {{- toYaml . | nindent 12 }}

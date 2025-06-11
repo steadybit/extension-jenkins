@@ -13,6 +13,15 @@ import (
 // through environment variables. Learn more through the documentation of the envconfig package.
 // https://github.com/kelseyhightower/envconfig
 type Specification struct {
+	// The Jenkins Base Url, like 'https://ci.jenkins.io'
+	BaseUrl string `json:"baseUrl" split_words:"true" required:"true"`
+	// The Jenkins API User
+	ApiUser string `json:"apiUser" split_words:"true" required:"true"`
+	// The Jenkins API Token
+	ApiToken string `json:"apiToken" split_words:"true" required:"true"`
+
+	// variable STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_JOB="jenkins.job.name.full".
+	DiscoveryAttributesExcludesJob []string `json:"discoveryAttributesExcludesJob" split_words:"true" required:"false"`
 }
 
 var (

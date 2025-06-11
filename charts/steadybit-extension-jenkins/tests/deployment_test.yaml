@@ -80,3 +80,11 @@ tests:
       priorityClassName: my-priority-class
     asserts:
       - matchSnapshot: {}
+
+  - it: manifest should match snapshot with required values
+    set:
+      jenkins.baseUrl: https://jenkins.example.com
+      jenkins.apiToken: 1234567890abcdef1234567890abcdef12345678
+      jenkins.apiUser: daniel
+    asserts:
+      - matchSnapshot: {}

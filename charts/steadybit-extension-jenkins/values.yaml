@@ -1,6 +1,17 @@
 # Default values for steadybit-extension-jenkins.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
+
+jenkins:
+  # jenkins.baseUrl -- The Jenkins Base Url, like 'https://ci.jenkins.io'
+  baseUrl: null
+  # jenkins.apiUser -- The Jenkins API User
+  apiUser: null
+  # jenkins.apiToken -- The Jenkins API Token
+  apiToken: null
+  # jenkins.existingSecret -- If defined, will skip secret creation and instead assume that the referenced secret contains the key `api-token`.
+  existingSecret: null
+
 image:
   # image.name -- The container image to use for the Steadybit jenkins extension.
   name: ghcr.io/steadybit/extension-jenkins
