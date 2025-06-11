@@ -51,11 +51,11 @@ func (d *jobDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
-				{Attribute: "steadybit.label"},
+				{Attribute: "jenkins.job.name.full.display"},
 			},
 			OrderBy: []discovery_kit_api.OrderBy{
 				{
-					Attribute: "steadybit.label",
+					Attribute: "jenkins.job.name.full.display",
 					Direction: "ASC",
 				},
 			},
@@ -77,6 +77,13 @@ func (d *jobDiscovery) DescribeAttributes() []discovery_kit_api.AttributeDescrip
 			Label: discovery_kit_api.PluralLabel{
 				One:   "Job full name",
 				Other: "Job full names",
+			},
+		},
+		{
+			Attribute: "jenkins.job.name.full.display",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "Job display name",
+				Other: "Job display names",
 			},
 		},
 		{
@@ -102,11 +109,11 @@ func (d *jobDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api
 			TargetType: TargetTypeJob,
 			Label:      job.GetDetails().FullDisplayName,
 			Attributes: map[string][]string{
-				"steadybit.label":       {job.GetDetails().FullDisplayName},
-				"jenkins.job.name":      {job.GetName()},
-				"jenkins.job.name.full": {job.GetDetails().FullName},
-				"jenkins.job.url":       {job.GetDetails().URL},
-				"jenkins.job.class":     {job.GetDetails().Class},
+				"jenkins.job.name":              {job.GetName()},
+				"jenkins.job.name.full":         {job.GetDetails().FullName},
+				"jenkins.job.name.full.display": {job.GetDetails().FullDisplayName},
+				"jenkins.job.url":               {job.GetDetails().URL},
+				"jenkins.job.class":             {job.GetDetails().Class},
 			},
 		}
 
