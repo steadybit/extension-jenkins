@@ -46,6 +46,7 @@ func main() {
 	}
 
 	discovery_kit_sdk.Register(extjenkins.NewJobDiscovery(jenkins))
+	action_kit_sdk.RegisterAction(extjenkins.NewJobRunAction(jenkins))
 
 	exthttp.RegisterHttpHandler("/", exthttp.GetterAsHandler(getExtensionList))
 
