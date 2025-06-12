@@ -95,6 +95,14 @@ func (l *jobRunAction) Describe() action_kit_api.ActionDescription {
 			CallInterval: extutil.Ptr("2s"),
 		}),
 		Stop: extutil.Ptr(action_kit_api.MutatingEndpointReference{}),
+		Widgets: extutil.Ptr([]action_kit_api.Widget{
+			action_kit_api.MarkdownWidget{
+				Type:        action_kit_api.ComSteadybitWidgetMarkdown,
+				Title:       "Jenkins",
+				MessageType: "JENKINS",
+				Append:      true,
+			},
+		}),
 	}
 }
 
@@ -154,7 +162,16 @@ func (l *jobRunAction) Start(ctx context.Context, state *JobRunActionState) (*ac
 	}
 	log.Info().Int64("queueId", queueId).Msg("Job queued successfully.")
 	state.QueueId = queueId
-	return nil, nil
+
+	result := &action_kit_api.StartResult{
+		Messages: &[]action_kit_api.Message{
+			{
+				Message: "- Waiting for job to start...",
+				Type:    extutil.Ptr("JENKINS"),
+			},
+		},
+	}
+	return result, nil
 }
 
 func (l *jobRunAction) Status(ctx context.Context, state *JobRunActionState) (*action_kit_api.StatusResult, error) {
@@ -162,17 +179,11 @@ func (l *jobRunAction) Status(ctx context.Context, state *JobRunActionState) (*a
 	if err != nil {
 		return nil, extension_kit.ToError("Failed to fetch task.", err)
 	}
+
+	justStarted := false
 	if state.RunId == 0 && task.Raw.Executable.Number != 0 {
 		state.RunId = task.Raw.Executable.Number
-		if !state.WaitForCompletion {
-			log.Info().Int64("runId", task.Raw.Executable.Number).Msg("Job started, action will not waiting for completion.")
-			state.DontStop = true
-			return &action_kit_api.StatusResult{
-				Completed: true,
-			}, nil
-		} else {
-			log.Info().Int64("runId", task.Raw.Executable.Number).Msg("Job started.")
-		}
+		justStarted = true
 	}
 
 	if state.RunId != 0 {
@@ -185,19 +196,57 @@ func (l *jobRunAction) Status(ctx context.Context, state *JobRunActionState) (*a
 			return nil, extension_kit.ToError("Failed to fetch build.", err)
 		}
 
+		if justStarted {
+			if !state.WaitForCompletion {
+				log.Info().Int64("runId", task.Raw.Executable.Number).Msg("Job started, action will not waiting for completion.")
+				state.DontStop = true
+				return &action_kit_api.StatusResult{
+					Completed: true,
+					Messages: &[]action_kit_api.Message{
+						{
+							Message: fmt.Sprintf("- Job started, action will not wait for completion. [Build](%s) [Console](%sconsole)", build.Raw.URL, build.Raw.URL),
+							Type:    extutil.Ptr("JENKINS"),
+						},
+					},
+				}, nil
+			} else {
+				log.Info().Int64("runId", task.Raw.Executable.Number).Msg("Job started.")
+				return &action_kit_api.StatusResult{
+					Completed: false,
+					Messages: &[]action_kit_api.Message{
+						{
+							Message: fmt.Sprintf("- Job started. [Open](%s) [Console](%sconsole)", build.Raw.URL, build.Raw.URL),
+							Type:    extutil.Ptr("JENKINS"),
+						},
+					},
+				}, nil
+			}
+		}
+
 		if !build.Raw.Building {
 			log.Info().Str("result", build.Raw.Result).Msg("Job completed.")
 			state.DontStop = true
 			var result *action_kit_api.ActionKitError = nil
+			var messages []action_kit_api.Message
 			if build.Raw.Result != gojenkins.STATUS_FIXED && build.Raw.Result != gojenkins.STATUS_SUCCESS && build.Raw.Result != gojenkins.STATUS_PASSED {
 				result = &action_kit_api.ActionKitError{
 					Status: extutil.Ptr(action_kit_api.Failed),
 					Title:  fmt.Sprintf("Job ended with result: %s", build.Raw.Result),
 				}
+				messages = append(messages, action_kit_api.Message{
+					Message: fmt.Sprintf("- Job ended with result '%s' ⚠️", build.Raw.Result),
+					Type:    extutil.Ptr("JENKINS"),
+				})
+			} else {
+				messages = append(messages, action_kit_api.Message{
+					Message: fmt.Sprintf("- Job ended with result '%s' ✅", build.Raw.Result),
+					Type:    extutil.Ptr("JENKINS"),
+				})
 			}
 			return &action_kit_api.StatusResult{
 				Completed: true,
 				Error:     result,
+				Messages:  &messages,
 			}, nil
 		}
 	} else {
@@ -226,6 +275,7 @@ func (l *jobRunAction) Stop(ctx context.Context, state *JobRunActionState) (*act
 		log.Info().Msg("Task canceled.")
 	}
 
+	var messages []action_kit_api.Message
 	if task.Raw.Executable.Number != 0 {
 		job, err := l.jenkins.GetJob(ctx, state.JobName, state.ParentIds...)
 		if err != nil {
@@ -241,7 +291,13 @@ func (l *jobRunAction) Stop(ctx context.Context, state *JobRunActionState) (*act
 		}
 		if stopped {
 			log.Info().Msg("Job stopped.")
+			messages = append(messages, action_kit_api.Message{
+				Message: "- Job stopped. 🛑",
+				Type:    extutil.Ptr("JENKINS"),
+			})
 		}
 	}
-	return nil, nil
+	return &action_kit_api.StopResult{
+		Messages: &messages,
+	}, nil
 }
