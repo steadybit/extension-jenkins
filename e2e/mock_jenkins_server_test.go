@@ -19,18 +19,31 @@ func createMockJenkinsServer() *httptest.Server {
 		Config: &http.Server{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			log.Info().Str("path", r.URL.Path).Str("method", r.Method).Str("query", r.URL.RawQuery).Msg("Request received")
 
-			if strings.HasSuffix(r.URL.Path, "/job/project 1/api/json") {
+			if strings.HasSuffix(r.URL.Path, "/job/my-job/api/json") {
 				w.WriteHeader(http.StatusOK)
-				w.Write(getProject1())
+				w.Write(getMyJob())
 			} else if strings.HasSuffix(r.URL.Path, "/job/Folder/api/json") {
 				w.WriteHeader(http.StatusOK)
 				w.Write(getFolder())
+			} else if strings.HasSuffix(r.URL.Path, "/crumbIssuer/api/json/api/json") {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"_class": "hudson.security.csrf.DefaultCrumbIssuer","crumb": "13749c63e9ed3f7dae947786bb7922dcb9f8609a4aba48089cde33b623ab1dc1","crumbRequestField": "Jenkins-Crumb"}`))
+			} else if strings.HasSuffix(r.URL.Path, "/job/my-job/buildWithParameters") {
+				log.Info().Msg("Return buildWithParameters with Location header")
+				w.Header().Add("Location", "http://localhost:8090/queue/item/20/")
+				w.WriteHeader(http.StatusOK)
 			} else if strings.HasSuffix(r.URL.Path, "/job/Folder/job/Folder-project/api/json") {
 				w.WriteHeader(http.StatusOK)
-				w.Write(getProjectInFolder())
+				w.Write(getJobInFolder())
+			} else if strings.HasSuffix(r.URL.Path, "/queue/item/20/api/json") {
+				w.WriteHeader(http.StatusOK)
+				w.Write(getQueueItem())
 			} else if strings.HasSuffix(r.URL.Path, "/api/json") && !strings.Contains(r.URL.Path, "/job") {
 				w.WriteHeader(http.StatusOK)
 				w.Write(getRoot())
+			} else if strings.HasSuffix(r.URL.Path, "/job/my-job//9/api/json") {
+				w.WriteHeader(http.StatusOK)
+				w.Write(getBuild())
 			} else {
 				w.WriteHeader(http.StatusBadRequest)
 			}
@@ -41,6 +54,135 @@ func createMockJenkinsServer() *httptest.Server {
 	return &server
 }
 
+func getBuild() []byte {
+	log.Info().Msg("Return build response")
+	return []byte(`{
+  "_class": "hudson.model.FreeStyleBuild",
+  "actions": [
+    {
+      "_class": "hudson.model.ParametersAction",
+      "parameters": [
+        {
+          "_class": "hudson.model.BooleanParameterValue",
+          "name": "Are you sure?",
+          "value": false
+        },
+        {
+          "_class": "hudson.model.StringParameterValue",
+          "name": "Just a string input",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "_class": "hudson.model.CauseAction",
+      "causes": [
+        {
+          "_class": "hudson.model.Cause$UserIdCause",
+          "shortDescription": "Started by user Jenkins Admin",
+          "userId": "admin",
+          "userName": "Jenkins Admin"
+        }
+      ]
+    },
+    {
+      "_class": "jenkins.metrics.impl.TimeInQueueAction",
+      "blockedDurationMillis": 0,
+      "blockedTimeMillis": 0,
+      "buildableDurationMillis": 22938,
+      "buildableTimeMillis": 22938,
+      "buildingDurationMillis": 15358,
+      "executingTimeMillis": 15358,
+      "executorUtilization": 1,
+      "subTaskCount": 0,
+      "waitingDurationMillis": 1,
+      "waitingTimeMillis": 1
+    },
+    {
+      "_class": "org.jenkinsci.plugins.displayurlapi.actions.RunDisplayAction"
+    }
+  ],
+  "artifacts": [],
+  "building": false,
+  "description": null,
+  "displayName": "#9",
+  "duration": 15358,
+  "estimatedDuration": 14848,
+  "executor": null,
+  "fullDisplayName": "Example Job #9",
+  "id": "9",
+  "inProgress": false,
+  "keepLog": false,
+  "number": 9,
+  "queueId": 21,
+  "result": "SUCCESS",
+  "timestamp": 1749733287152,
+  "url": "http://localhost:8090/job/Example%20Job/9/",
+  "builtOn": "default-zn7ks",
+  "changeSet": {
+    "_class": "hudson.scm.EmptyChangeLogSet",
+    "items": [],
+    "kind": null
+  },
+  "culprits": []
+}`)
+}
+
+func getQueueItem() []byte {
+	log.Info().Msg("Return queue item response")
+	return []byte(`{
+  "_class": "hudson.model.Queue$LeftItem",
+  "actions": [
+    {
+      "_class": "hudson.model.ParametersAction",
+      "parameters": [
+        {
+          "_class": "hudson.model.BooleanParameterValue",
+          "name": "Are you sure?",
+          "value": false
+        },
+        {
+          "_class": "hudson.model.StringParameterValue",
+          "name": "Just a string input",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "_class": "hudson.model.CauseAction",
+      "causes": [
+        {
+          "_class": "hudson.model.Cause$UserIdCause",
+          "shortDescription": "Started by user Jenkins Admin",
+          "userId": "admin",
+          "userName": "Jenkins Admin"
+        }
+      ]
+    }
+  ],
+  "blocked": false,
+  "buildable": false,
+  "id": 21,
+  "inQueueSince": 1749733264212,
+  "params": "\nAre you sure?=false\nJust a string input=",
+  "stuck": false,
+  "task": {
+    "_class": "hudson.model.FreeStyleProject",
+    "name": "Example Job",
+    "url": "http://localhost:8090/job/Example%20Job/",
+    "color": "blue"
+  },
+  "url": "queue/item/21/",
+  "why": null,
+  "cancelled": false,
+  "executable": {
+    "_class": "hudson.model.FreeStyleBuild",
+    "number": 9,
+    "url": "http://localhost:8090/job/Example%20Job/9/"
+  }
+}`)
+
+}
 func getFolder() []byte {
 	log.Info().Msg("Return folder response")
 	return []byte(`{
@@ -83,7 +225,7 @@ func getFolder() []byte {
 }`)
 }
 
-func getProjectInFolder() []byte {
+func getJobInFolder() []byte {
 	log.Info().Msg("Return project in folder response")
 	return []byte(`{
   "_class": "hudson.model.FreeStyleProject",
@@ -132,8 +274,8 @@ func getProjectInFolder() []byte {
 }`)
 }
 
-func getProject1() []byte {
-	log.Info().Msg("Return project 1 response")
+func getMyJob() []byte {
+	log.Info().Msg("Return my-job response")
 	return []byte(`{
   "_class": "hudson.model.FreeStyleProject",
   "actions": [
@@ -172,12 +314,12 @@ func getProject1() []byte {
     }
   ],
   "description": "saS",
-  "displayName": "another project",
+  "displayName": "my-job",
   "displayNameOrNull": null,
-  "fullDisplayName": "another project",
-  "fullName": "another project",
-  "name": "another project",
-  "url": "http://jenkins:8080/job/project%201/",
+  "fullDisplayName": "my-job",
+  "fullName": "my-job",
+  "name": "my-job",
+  "url": "http://jenkins:8080/job/my-job/",
   "buildable": true,
   "builds": [],
   "color": "red",
@@ -251,8 +393,8 @@ func getRoot() []byte {
   "jobs": [
     {
       "_class": "hudson.model.FreeStyleProject",
-      "name": "project 1",
-      "url": "http://jenkins:8080/job/project%201/",
+      "name": "my-job",
+      "url": "http://jenkins:8080/job/my-job/",
       "color": "red"
     },
     {
