@@ -49,7 +49,7 @@ func (l *jobRunAction) NewEmptyState() JobRunActionState {
 func (l *jobRunAction) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:          fmt.Sprintf("%s.run", TargetTypeJob),
-		Label:       "Run Job",
+		Label:       "Run Jenkins Job",
 		Description: "Starts a Jenkins job.",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        extutil.Ptr(TargetIconJob),
@@ -119,8 +119,16 @@ func (l *jobRunAction) Prepare(_ context.Context, state *JobRunActionState, requ
 
 		availableParameters, hasParams := request.Target.Attributes["jenkins.job.parameter"]
 		if (!hasParams || len(availableParameters) == 0) && len(state.Parameters) > 0 {
-			return nil, extension_kit.ToError("This job does not have any parameters defined, but parameters were provided.", nil)
+			return &action_kit_api.PrepareResult{
+				Messages: &[]action_kit_api.Message{
+					{
+						Message: fmt.Sprintf("- ⚠️ This job does not have any parameters defined, but parameters were provided."),
+						Type:    extutil.Ptr("JENKINS"),
+					},
+				},
+			}, nil
 		}
+		missingParameters := []string{}
 		for key := range state.Parameters {
 			found := false
 			for _, param := range availableParameters {
@@ -130,8 +138,18 @@ func (l *jobRunAction) Prepare(_ context.Context, state *JobRunActionState, requ
 				}
 			}
 			if !found {
-				return nil, extension_kit.ToError(fmt.Sprintf("parameter '%s' is not available for this job", key), nil)
+				missingParameters = append(missingParameters, key)
 			}
+		}
+		if len(missingParameters) > 0 {
+			return &action_kit_api.PrepareResult{
+				Messages: &[]action_kit_api.Message{
+					{
+						Message: fmt.Sprintf("- ⚠️ The following parameters are not defined for this job: %s", strings.Join(missingParameters, ", ")),
+						Type:    extutil.Ptr("JENKINS"),
+					},
+				},
+			}, nil
 		}
 	}
 	return nil, nil
