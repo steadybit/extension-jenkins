@@ -122,7 +122,7 @@ func (l *jobRunAction) Prepare(_ context.Context, state *JobRunActionState, requ
 			return &action_kit_api.PrepareResult{
 				Messages: &[]action_kit_api.Message{
 					{
-						Message: fmt.Sprintf("- ⚠️ This job does not have any parameters defined, but parameters were provided."),
+						Message: "- ⚠️ This job does not have any parameters defined, but parameters were provided.",
 						Type:    extutil.Ptr("JENKINS"),
 					},
 				},
