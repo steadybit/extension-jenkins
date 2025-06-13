@@ -33,6 +33,9 @@ You must provide additional values to activate this extension.
 
 ```
 --set extension-jenkins.enabled=true \
+--set extension-jenkins.jenkins.baseURL=<YOUR_BASE_URL> \
+--set extension-jenkins.jenkins.apiUser=<YOUR_API_USER> \
+--set extension-jenkins.jenkins.apiToken=<YOUR_API_TOKEN> \
 ```
 
 Additional configuration options can be found in
