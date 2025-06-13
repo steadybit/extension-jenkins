@@ -45,7 +45,7 @@ func (d *jobDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:    extutil.Ptr(TargetIconJob),
 
-		Label: discovery_kit_api.PluralLabel{One: "Job", Other: "Jobs"},
+		Label: discovery_kit_api.PluralLabel{One: "Jenkins Job", Other: "Jenkins Jobs"},
 
 		Category: extutil.Ptr("Jenkins"),
 
