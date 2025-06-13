@@ -9,8 +9,11 @@ Learn about the capabilities of this extension in our [Reliability Hub](https://
 
 ## Configuration
 
-| Environment Variable                                      | Helm value                           | Meaning                                                                                                               | Required | Default                 |
-|-----------------------------------------------------------|--------------------------------------|-----------------------------------------------------------------------------------------------------------------------|----------|-------------------------|
+| Environment Variable          | Helm value         | Meaning                                                                 | Required | Default |
+|-------------------------------|--------------------|-------------------------------------------------------------------------|----------|---------|
+| STEADYBIT_EXTENSION_BASE_URL  | `jenkins.baseUrl`  | The base URL of your Jenkins installation, like 'https://ci.jenkins.io' | yes      |         |
+| STEADYBIT_EXTENSION_API_USER  | `jenkins.apiUser`  | The Jenkins API User                                                    | yes      |         |
+| STEADYBIT_EXTENSION_API_TOKEN | `jenkins.apiToken` | The Jenkins API Token                                                   | yes      |         |
 
 The extension supports all environment variables provided by [steadybit/extension-kit](https://github.com/steadybit/extension-kit#environment-variables).
 
@@ -50,6 +53,9 @@ helm upgrade steadybit-extension-jenkins \
     --timeout 5m0s \
     --create-namespace \
     --namespace steadybit-agent \
+    --set jenkins.baseURL=<YOUR_BASE_URL> \
+    --set jenkins.apiUser=<YOUR_API_USER> \
+    --set jenkins.apiToken=<YOUR_API_TOKEN> \
     steadybit-extension-jenkins/steadybit-extension-jenkins
 ```
 
