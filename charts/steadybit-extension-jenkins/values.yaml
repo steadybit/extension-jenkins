@@ -11,6 +11,8 @@ jenkins:
   apiToken: null
   # jenkins.existingSecret -- If defined, will skip secret creation and instead assume that the referenced secret contains the key `api-token`.
   existingSecret: null
+  # jenkins.insecureSkipVerify -- If true, the extension will skip TLS verification when connecting to Jenkins (for self-signed certificates)
+  insecureSkipVerify: false
 
 image:
   # image.name -- The container image to use for the Steadybit jenkins extension.
@@ -138,3 +140,19 @@ extraEnv: []
 #  - secretRef:
 #    name: env-secrets
 extraEnvFrom: []
+
+# extraVolumeMounts -- Additional volumeMounts to add to the container
+# e.g:
+# extraVolumeMounts:
+#   - name: extra-certs
+#     mountPath: /etc/ssl/extra-certs
+#     readOnly: true
+extraVolumeMounts: []
+
+# extraVolumes -- Additional volumes to add to the pod
+# e.g:
+# extraVolumes:
+#   - name: extra-certs
+#     configMap:
+#       name: jenkins-self-signed-ca
+extraVolumes: []

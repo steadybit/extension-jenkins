@@ -37,6 +37,8 @@ manifest should match snapshot using podAnnotations and Labels:
                     secretKeyRef:
                       key: api-token
                       name: steadybit-extension-jenkins
+                - name: STEADYBIT_EXTENSION_INSECURE_SKIP_VERIFY
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -119,6 +121,8 @@ manifest should match snapshot with TLS:
                     secretKeyRef:
                       key: api-token
                       name: steadybit-extension-jenkins
+                - name: STEADYBIT_EXTENSION_INSECURE_SKIP_VERIFY
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -175,6 +179,98 @@ manifest should match snapshot with TLS:
               secret:
                 optional: false
                 secretName: server-cert
+manifest should match snapshot with custom certificates using extraVolumes and extraVolumeMounts:
+  1: |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      labels:
+        steadybit.com/discovery-disabled: "true"
+        steadybit.com/extension: "true"
+      name: RELEASE-NAME-steadybit-extension-jenkins
+      namespace: NAMESPACE
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: RELEASE-NAME
+          app.kubernetes.io/name: steadybit-extension-jenkins
+      template:
+        metadata:
+          annotations:
+            oneagent.dynatrace.com/injection: "false"
+          labels:
+            app.kubernetes.io/instance: RELEASE-NAME
+            app.kubernetes.io/name: steadybit-extension-jenkins
+            steadybit.com/discovery-disabled: "true"
+            steadybit.com/extension: "true"
+        spec:
+          containers:
+            - env:
+                - name: STEADYBIT_EXTENSION_BASE_URL
+                  value: null
+                - name: STEADYBIT_EXTENSION_API_USER
+                  value: null
+                - name: STEADYBIT_EXTENSION_API_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      key: api-token
+                      name: steadybit-extension-jenkins
+                - name: STEADYBIT_EXTENSION_INSECURE_SKIP_VERIFY
+                  value: "false"
+                - name: STEADYBIT_LOG_LEVEL
+                  value: INFO
+                - name: STEADYBIT_LOG_FORMAT
+                  value: text
+                - name: SSL_CERT_DIR
+                  value: /etc/ssl/extra-certs:/etc/ssl/certs
+              image: ghcr.io/steadybit/extension-jenkins:v0.0.0
+              imagePullPolicy: IfNotPresent
+              livenessProbe:
+                failureThreshold: 5
+                httpGet:
+                  path: /health/liveness
+                  port: 8083
+                initialDelaySeconds: 10
+                periodSeconds: 10
+                successThreshold: 1
+                timeoutSeconds: 5
+              name: extension
+              readinessProbe:
+                failureThreshold: 3
+                httpGet:
+                  path: /health/readiness
+                  port: 8083
+                initialDelaySeconds: 10
+                periodSeconds: 10
+                successThreshold: 1
+                timeoutSeconds: 1
+              resources:
+                limits:
+                  cpu: 200m
+                  memory: 32Mi
+                requests:
+                  cpu: 50m
+                  memory: 16Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
+              volumeMounts:
+                - mountPath: /etc/ssl/extra-certs
+                  name: extra-certs
+                  readOnly: true
+          securityContext:
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          serviceAccountName: steadybit-extension-jenkins
+          volumes:
+            - configMap:
+                name: jenkins-self-signed-ca
+              name: extra-certs
 manifest should match snapshot with extra env vars:
   1: |
     apiVersion: apps/v1
@@ -212,6 +308,8 @@ manifest should match snapshot with extra env vars:
                     secretKeyRef:
                       key: api-token
                       name: steadybit-extension-jenkins
+                - name: STEADYBIT_EXTENSION_INSECURE_SKIP_VERIFY
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -303,6 +401,92 @@ manifest should match snapshot with extra labels:
                     secretKeyRef:
                       key: api-token
                       name: steadybit-extension-jenkins
+                - name: STEADYBIT_EXTENSION_INSECURE_SKIP_VERIFY
+                  value: "false"
+                - name: STEADYBIT_LOG_LEVEL
+                  value: INFO
+                - name: STEADYBIT_LOG_FORMAT
+                  value: text
+              image: ghcr.io/steadybit/extension-jenkins:v0.0.0
+              imagePullPolicy: IfNotPresent
+              livenessProbe:
+                failureThreshold: 5
+                httpGet:
+                  path: /health/liveness
+                  port: 8083
+                initialDelaySeconds: 10
+                periodSeconds: 10
+                successThreshold: 1
+                timeoutSeconds: 5
+              name: extension
+              readinessProbe:
+                failureThreshold: 3
+                httpGet:
+                  path: /health/readiness
+                  port: 8083
+                initialDelaySeconds: 10
+                periodSeconds: 10
+                successThreshold: 1
+                timeoutSeconds: 1
+              resources:
+                limits:
+                  cpu: 200m
+                  memory: 32Mi
+                requests:
+                  cpu: 50m
+                  memory: 16Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
+              volumeMounts: null
+          securityContext:
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          serviceAccountName: steadybit-extension-jenkins
+          volumes: null
+manifest should match snapshot with insecureSkipVerify enabled:
+  1: |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      labels:
+        steadybit.com/discovery-disabled: "true"
+        steadybit.com/extension: "true"
+      name: RELEASE-NAME-steadybit-extension-jenkins
+      namespace: NAMESPACE
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: RELEASE-NAME
+          app.kubernetes.io/name: steadybit-extension-jenkins
+      template:
+        metadata:
+          annotations:
+            oneagent.dynatrace.com/injection: "false"
+          labels:
+            app.kubernetes.io/instance: RELEASE-NAME
+            app.kubernetes.io/name: steadybit-extension-jenkins
+            steadybit.com/discovery-disabled: "true"
+            steadybit.com/extension: "true"
+        spec:
+          containers:
+            - env:
+                - name: STEADYBIT_EXTENSION_BASE_URL
+                  value: https://jenkins.example.com
+                - name: STEADYBIT_EXTENSION_API_USER
+                  value: user
+                - name: STEADYBIT_EXTENSION_API_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      key: api-token
+                      name: steadybit-extension-jenkins
+                - name: STEADYBIT_EXTENSION_INSECURE_SKIP_VERIFY
+                  value: "true"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -385,6 +569,8 @@ manifest should match snapshot with mutual TLS:
                     secretKeyRef:
                       key: api-token
                       name: steadybit-extension-jenkins
+                - name: STEADYBIT_EXTENSION_INSECURE_SKIP_VERIFY
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -487,6 +673,8 @@ manifest should match snapshot with mutual TLS using containerPaths:
                     secretKeyRef:
                       key: api-token
                       name: steadybit-extension-jenkins
+                - name: STEADYBIT_EXTENSION_INSECURE_SKIP_VERIFY
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -575,6 +763,8 @@ manifest should match snapshot with podSecurityContext:
                     secretKeyRef:
                       key: api-token
                       name: steadybit-extension-jenkins
+                - name: STEADYBIT_EXTENSION_INSECURE_SKIP_VERIFY
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -658,6 +848,8 @@ manifest should match snapshot with priority class:
                     secretKeyRef:
                       key: api-token
                       name: steadybit-extension-jenkins
+                - name: STEADYBIT_EXTENSION_INSECURE_SKIP_VERIFY
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -741,6 +933,8 @@ manifest should match snapshot with required values:
                     secretKeyRef:
                       key: api-token
                       name: steadybit-extension-jenkins
+                - name: STEADYBIT_EXTENSION_INSECURE_SKIP_VERIFY
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -823,6 +1017,8 @@ manifest should match snapshot without TLS:
                     secretKeyRef:
                       key: api-token
                       name: steadybit-extension-jenkins
+                - name: STEADYBIT_EXTENSION_INSECURE_SKIP_VERIFY
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
