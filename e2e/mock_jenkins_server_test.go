@@ -1,6 +1,7 @@
 package e2e
 
 import (
+	"crypto/tls"
 	"fmt"
 	"github.com/rs/zerolog/log"
 	"net"
@@ -10,47 +11,61 @@ import (
 )
 
 func createMockJenkinsServer() *httptest.Server {
+	// Generate self-signed certificate for TLS
+	cert, err := generateSelfSignedCert()
+	if err != nil {
+		panic(fmt.Sprintf("httptest: failed to generate self-signed certificate: %v", err))
+	}
+
 	listener, err := net.Listen("tcp", "0.0.0.0:0")
 	if err != nil {
 		panic(fmt.Sprintf("httptest: failed to listen: %v", err))
 	}
+
 	server := httptest.Server{
 		Listener: listener,
-		Config: &http.Server{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			log.Info().Str("path", r.URL.Path).Str("method", r.Method).Str("query", r.URL.RawQuery).Msg("Request received")
+		Config: &http.Server{
+			Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				log.Info().Str("path", r.URL.Path).Str("method", r.Method).Str("query", r.URL.RawQuery).Msg("Request received")
 
-			if strings.HasSuffix(r.URL.Path, "/job/my-job/api/json") {
-				w.WriteHeader(http.StatusOK)
-				w.Write(getMyJob())
-			} else if strings.HasSuffix(r.URL.Path, "/job/Folder/api/json") {
-				w.WriteHeader(http.StatusOK)
-				w.Write(getFolder())
-			} else if strings.HasSuffix(r.URL.Path, "/crumbIssuer/api/json/api/json") {
-				w.WriteHeader(http.StatusOK)
-				w.Write([]byte(`{"_class": "hudson.security.csrf.DefaultCrumbIssuer","crumb": "13749c63e9ed3f7dae947786bb7922dcb9f8609a4aba48089cde33b623ab1dc1","crumbRequestField": "Jenkins-Crumb"}`))
-			} else if strings.HasSuffix(r.URL.Path, "/job/my-job/buildWithParameters") {
-				log.Info().Msg("Return buildWithParameters with Location header")
-				w.Header().Add("Location", "http://localhost:8090/queue/item/20/")
-				w.WriteHeader(http.StatusOK)
-			} else if strings.HasSuffix(r.URL.Path, "/job/Folder/job/Folder-project/api/json") {
-				w.WriteHeader(http.StatusOK)
-				w.Write(getJobInFolder())
-			} else if strings.HasSuffix(r.URL.Path, "/queue/item/20/api/json") {
-				w.WriteHeader(http.StatusOK)
-				w.Write(getQueueItem())
-			} else if strings.HasSuffix(r.URL.Path, "/api/json") && !strings.Contains(r.URL.Path, "/job") {
-				w.WriteHeader(http.StatusOK)
-				w.Write(getRoot())
-			} else if strings.HasSuffix(r.URL.Path, "/job/my-job//9/api/json") {
-				w.WriteHeader(http.StatusOK)
-				w.Write(getBuild())
-			} else {
-				w.WriteHeader(http.StatusBadRequest)
-			}
-		})},
+				if strings.HasSuffix(r.URL.Path, "/job/my-job/api/json") {
+					w.WriteHeader(http.StatusOK)
+					w.Write(getMyJob())
+				} else if strings.HasSuffix(r.URL.Path, "/job/Folder/api/json") {
+					w.WriteHeader(http.StatusOK)
+					w.Write(getFolder())
+				} else if strings.HasSuffix(r.URL.Path, "/crumbIssuer/api/json/api/json") {
+					w.WriteHeader(http.StatusOK)
+					w.Write([]byte(`{"_class": "hudson.security.csrf.DefaultCrumbIssuer","crumb": "13749c63e9ed3f7dae947786bb7922dcb9f8609a4aba48089cde33b623ab1dc1","crumbRequestField": "Jenkins-Crumb"}`))
+				} else if strings.HasSuffix(r.URL.Path, "/job/my-job/buildWithParameters") {
+					log.Info().Msg("Return buildWithParameters with Location header")
+					w.Header().Add("Location", "http://host.minikube.internal:8090/queue/item/20/")
+					w.WriteHeader(http.StatusOK)
+				} else if strings.HasSuffix(r.URL.Path, "/job/Folder/job/Folder-project/api/json") {
+					w.WriteHeader(http.StatusOK)
+					w.Write(getJobInFolder())
+				} else if strings.HasSuffix(r.URL.Path, "/queue/item/20/api/json") {
+					w.WriteHeader(http.StatusOK)
+					w.Write(getQueueItem())
+				} else if strings.HasSuffix(r.URL.Path, "/api/json") && !strings.Contains(r.URL.Path, "/job") {
+					w.WriteHeader(http.StatusOK)
+					w.Write(getRoot())
+				} else if strings.HasSuffix(r.URL.Path, "/job/my-job//9/api/json") {
+					w.WriteHeader(http.StatusOK)
+					w.Write(getBuild())
+				} else {
+					w.WriteHeader(http.StatusBadRequest)
+				}
+			}),
+			TLSConfig: &tls.Config{},
+		},
+		TLS: &tls.Config{
+			Certificates: []tls.Certificate{cert},
+		},
 	}
-	server.Start()
-	log.Info().Str("url", server.URL).Msg("Started Mock-Server")
+
+	server.StartTLS()
+	log.Info().Str("url", server.URL).Msg("Started Mock-Server with self-signed certificate")
 	return &server
 }
 

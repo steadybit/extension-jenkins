@@ -32,9 +32,10 @@ func TestWithMinikube(t *testing.T) {
 		ExtraArgs: func(m *e2e.Minikube) []string {
 			return []string{
 				"--set", "logging.level=debug",
-				"--set", fmt.Sprintf("jenkins.baseUrl=http://host.minikube.internal:%s", port),
+				"--set", fmt.Sprintf("jenkins.baseUrl=https://host.minikube.internal:%s", port),
 				"--set", "jenkins.apiToken=123xyz",
 				"--set", "jenkins.apiUser=admin",
+				"--set", "jenkins.insecureSkipVerify=true", // Enable skipping TLS verification
 			}
 		},
 	}

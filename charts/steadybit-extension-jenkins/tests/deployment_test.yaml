@@ -88,3 +88,49 @@ tests:
       jenkins.apiUser: daniel
     asserts:
       - matchSnapshot: {}
+  - it: manifest should match snapshot with insecureSkipVerify enabled
+    set:
+      jenkins:
+        baseUrl: "https://jenkins.example.com"
+        apiUser: "user"
+        apiToken: "token"
+        insecureSkipVerify: true
+    asserts:
+      - matchSnapshot: { }
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: STEADYBIT_EXTENSION_INSECURE_SKIP_VERIFY
+            value: "true"
+  - it: manifest should match snapshot with custom certificates using extraVolumes and extraVolumeMounts
+    set:
+      extraVolumeMounts:
+        - name: extra-certs
+          mountPath: /etc/ssl/extra-certs
+          readOnly: true
+      extraVolumes:
+        - name: extra-certs
+          configMap:
+            name: jenkins-self-signed-ca
+      extraEnv:
+        - name: SSL_CERT_DIR
+          value: /etc/ssl/extra-certs:/etc/ssl/certs
+    asserts:
+      - matchSnapshot: { }
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: extra-certs
+            mountPath: /etc/ssl/extra-certs
+            readOnly: true
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: extra-certs
+            configMap:
+              name: jenkins-self-signed-ca
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SSL_CERT_DIR
+            value: /etc/ssl/extra-certs:/etc/ssl/certs

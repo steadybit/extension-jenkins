@@ -19,6 +19,8 @@ type Specification struct {
 	ApiUser string `json:"apiUser" split_words:"true" required:"true"`
 	// The Jenkins API Token
 	ApiToken string `json:"apiToken" split_words:"true" required:"true"`
+	// If true, the extension will skip TLS verification when connecting to Jenkins
+	InsecureSkipVerify bool `json:"insecureSkipVerify" split_words:"true" required:"false" default:"false"`
 
 	// variable STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_JOB="jenkins.job.name.full".
 	DiscoveryAttributesExcludesJob []string `json:"discoveryAttributesExcludesJob" split_words:"true" required:"false"`
