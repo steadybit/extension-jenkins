@@ -46,7 +46,7 @@ func main() {
 	if config.Config.InsecureSkipVerify {
 		log.Info().Msg("TLS verification disabled for Jenkins connection. Self-signed certificates will be accepted.")
 		insecureTransport := &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, //NOSONAR explicit choice
 		}
 		httpClient = &http.Client{Transport: insecureTransport}
 	}
