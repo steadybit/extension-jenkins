@@ -15,6 +15,7 @@ import (
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
 	"strings"
+	"time"
 )
 
 type jobRunAction struct {
@@ -36,7 +37,10 @@ type JobRunActionState struct {
 	QueueId           int64
 	RunId             int64
 	DontStop          bool
+	TimeoutOffset     time.Duration `json:"timeoutOffset"`
 }
+
+var referenceTime = time.Now()
 
 func NewJobRunAction(jenkins *gojenkins.Jenkins) action_kit_sdk.Action[JobRunActionState] {
 	return &jobRunAction{jenkins: jenkins}
@@ -71,7 +75,7 @@ func (l *jobRunAction) Describe() action_kit_api.ActionDescription {
 				Name:         "duration",
 				Label:        "Estimated Duration",
 				Description:  extutil.Ptr("If `Wait for Completion` is checked, the step will run as long as needed. You can set this estimation to size the step in the experiment editor for a better understanding of the time schedule."),
-				Type:         action_kit_api.Duration,
+				Type:         action_kit_api.ActionParameterTypeDuration,
 				DefaultValue: extutil.Ptr("60s"),
 				Required:     extutil.Ptr(true),
 			},
@@ -79,7 +83,7 @@ func (l *jobRunAction) Describe() action_kit_api.ActionDescription {
 				Name:         "waitForCompletion",
 				Label:        "Wait for Completion",
 				Description:  extutil.Ptr("If enabled, the action will wait for the job to complete before returning. If disabled, the action will return immediately after starting the job."),
-				Type:         action_kit_api.Boolean,
+				Type:         action_kit_api.ActionParameterTypeBoolean,
 				DefaultValue: extutil.Ptr("true"),
 				Required:     extutil.Ptr(true),
 			},
@@ -87,8 +91,17 @@ func (l *jobRunAction) Describe() action_kit_api.ActionDescription {
 				Name:        "parameters",
 				Label:       "Parameters",
 				Description: extutil.Ptr("Optional parameters to pass to the job."),
-				Type:        action_kit_api.KeyValue,
+				Type:        action_kit_api.ActionParameterTypeKeyValue,
 				Required:    extutil.Ptr(false),
+			},
+			{
+				Name:         "jobStartTimeout",
+				Label:        "Job Start Timeout",
+				Description:  extutil.Ptr("Timeout for the job to start. If the job does not start within this time, the action will fail."),
+				Type:         action_kit_api.ActionParameterTypeDuration,
+				DefaultValue: extutil.Ptr("60s"),
+				Required:     extutil.Ptr(true),
+				Advanced:     extutil.Ptr(true),
 			},
 		},
 		Status: extutil.Ptr(action_kit_api.MutatingEndpointReferenceWithCallInterval{
@@ -110,6 +123,8 @@ func (l *jobRunAction) Prepare(_ context.Context, state *JobRunActionState, requ
 	state.JobName = extutil.MustHaveValue(request.Target.Attributes, "jenkins.job.name")[0]
 	state.ParentIds = extractParentIds(extutil.MustHaveValue(request.Target.Attributes, "jenkins.job.name.full")[0])
 	state.WaitForCompletion = extutil.ToBool(request.Config["waitForCompletion"])
+	jobStartTimeout := time.Duration(int(time.Millisecond) * extutil.ToInt(request.Config["jobStartTimeout"]))
+	state.TimeoutOffset = time.Since(referenceTime) + jobStartTimeout
 	if (request.Config["parameters"]) != nil {
 		var err error
 		state.Parameters, err = extutil.ToKeyValue(request.Config, "parameters")
@@ -268,6 +283,15 @@ func (l *jobRunAction) Status(ctx context.Context, state *JobRunActionState) (*a
 			}, nil
 		}
 	} else {
+		if time.Since(referenceTime) > state.TimeoutOffset {
+			return extutil.Ptr(action_kit_api.StatusResult{
+				Completed: true,
+				Error: extutil.Ptr(action_kit_api.ActionKitError{
+					Title:  "Timed out waiting for job to start.",
+					Status: extutil.Ptr(action_kit_api.Failed),
+				}),
+			}), nil
+		}
 		log.Info().Msg("Job is queued, waiting for start.")
 	}
 

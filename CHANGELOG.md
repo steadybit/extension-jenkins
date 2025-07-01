@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.2
+
+ - Added a Job Start timeout
+
 ## v1.0.1
 
  - Add support for self-signed certificates
