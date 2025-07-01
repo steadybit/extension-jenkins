@@ -11,6 +11,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
+	"github.com/steadybit/extension-jenkins/config"
 	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
@@ -94,15 +95,6 @@ func (l *jobRunAction) Describe() action_kit_api.ActionDescription {
 				Type:        action_kit_api.ActionParameterTypeKeyValue,
 				Required:    extutil.Ptr(false),
 			},
-			{
-				Name:         "jobStartTimeout",
-				Label:        "Job Start Timeout",
-				Description:  extutil.Ptr("Timeout for the job to start. If the job does not start within this time, the action will fail."),
-				Type:         action_kit_api.ActionParameterTypeDuration,
-				DefaultValue: extutil.Ptr("60s"),
-				Required:     extutil.Ptr(true),
-				Advanced:     extutil.Ptr(true),
-			},
 		},
 		Status: extutil.Ptr(action_kit_api.MutatingEndpointReferenceWithCallInterval{
 			CallInterval: extutil.Ptr("2s"),
@@ -123,7 +115,7 @@ func (l *jobRunAction) Prepare(_ context.Context, state *JobRunActionState, requ
 	state.JobName = extutil.MustHaveValue(request.Target.Attributes, "jenkins.job.name")[0]
 	state.ParentIds = extractParentIds(extutil.MustHaveValue(request.Target.Attributes, "jenkins.job.name.full")[0])
 	state.WaitForCompletion = extutil.ToBool(request.Config["waitForCompletion"])
-	jobStartTimeout := time.Duration(int(time.Millisecond) * extutil.ToInt(request.Config["jobStartTimeout"]))
+	jobStartTimeout := time.Duration(int(time.Millisecond) * config.Config.JobStartTimeoutSeconds)
 	state.TimeoutOffset = time.Since(referenceTime) + jobStartTimeout
 	if (request.Config["parameters"]) != nil {
 		var err error

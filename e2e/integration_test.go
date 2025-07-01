@@ -93,10 +93,8 @@ func testRunJob(t *testing.T, m *e2e.Minikube, e *e2e.Extension) {
 	}
 	config := struct {
 		WaitForCompletion bool `json:"waitForCompletion"`
-		JobStartTimeout   int  `json:"jobStartTimeout"`
 	}{
 		WaitForCompletion: true,
-		JobStartTimeout:   60,
 	}
 	context := &action_kit_api.ExecutionContext{ExperimentKey: extutil.Ptr("ADM-1"), ExecutionId: extutil.Ptr(4711)}
 	exec, err := e.RunAction("com.steadybit.extension_jenkins.job.run", target, config, context)

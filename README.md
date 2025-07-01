@@ -9,11 +9,12 @@ Learn about the capabilities of this extension in our [Reliability Hub](https://
 
 ## Configuration
 
-| Environment Variable          | Helm value         | Meaning                                                                 | Required | Default |
-|-------------------------------|--------------------|-------------------------------------------------------------------------|----------|---------|
-| STEADYBIT_EXTENSION_BASE_URL  | `jenkins.baseUrl`  | The base URL of your Jenkins installation, like 'https://ci.jenkins.io' | yes      |         |
-| STEADYBIT_EXTENSION_API_USER  | `jenkins.apiUser`  | The Jenkins API User                                                    | yes      |         |
-| STEADYBIT_EXTENSION_API_TOKEN | `jenkins.apiToken` | The Jenkins API Token                                                   | yes      |         |
+| Environment Variable                          | Helm value         | Meaning                                                                 | Required | Default |
+|-----------------------------------------------|--------------------|-------------------------------------------------------------------------|----------|---------|
+| STEADYBIT_EXTENSION_BASE_URL                  | `jenkins.baseUrl`  | The base URL of your Jenkins installation, like 'https://ci.jenkins.io' | yes      |         |
+| STEADYBIT_EXTENSION_API_USER                  | `jenkins.apiUser`  | The Jenkins API User                                                    | yes      |         |
+| STEADYBIT_EXTENSION_API_TOKEN                 | `jenkins.apiToken` | The Jenkins API Token                                                   | yes      |         |
+| STEADYBIT_EXTENSION_JOB_START_TIMEOUT_SECONDS |                    | Timeout for a job to start, otherwise an error is returned              | yes      | 60      |
 
 The extension supports all environment variables provided by [steadybit/extension-kit](https://github.com/steadybit/extension-kit#environment-variables).
 
