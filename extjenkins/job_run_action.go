@@ -280,7 +280,7 @@ func (l *jobRunAction) Status(ctx context.Context, state *JobRunActionState) (*a
 				Completed: true,
 				Error: extutil.Ptr(action_kit_api.ActionKitError{
 					Title:  "Timed out waiting for job to start.",
-					Status: extutil.Ptr(action_kit_api.Failed),
+					Status: extutil.Ptr(action_kit_api.Errored),
 				}),
 			}), nil
 		}
