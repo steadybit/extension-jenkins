@@ -115,7 +115,7 @@ func (l *jobRunAction) Prepare(_ context.Context, state *JobRunActionState, requ
 	state.JobName = extutil.MustHaveValue(request.Target.Attributes, "jenkins.job.name")[0]
 	state.ParentIds = extractParentIds(extutil.MustHaveValue(request.Target.Attributes, "jenkins.job.name.full")[0])
 	state.WaitForCompletion = extutil.ToBool(request.Config["waitForCompletion"])
-	jobStartTimeout := time.Duration(int(time.Millisecond) * config.Config.JobStartTimeoutSeconds)
+	jobStartTimeout := time.Duration(int(time.Second) * config.Config.JobStartTimeoutSeconds)
 	state.TimeoutOffset = time.Since(referenceTime) + jobStartTimeout
 	if (request.Config["parameters"]) != nil {
 		var err error
