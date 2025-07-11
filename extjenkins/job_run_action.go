@@ -66,7 +66,7 @@ func (l *jobRunAction) Describe() action_kit_api.ActionDescription {
 					Query: "jenkins.job.name=\"\"",
 				},
 			}),
-			QuantityRestriction: extutil.Ptr(action_kit_api.ExactlyOne),
+			QuantityRestriction: extutil.Ptr(action_kit_api.QuantityRestrictionExactlyOne),
 		}),
 		Technology:  extutil.Ptr("Jenkins"),
 		Kind:        action_kit_api.Other,
