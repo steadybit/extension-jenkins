@@ -2,6 +2,10 @@
 
 ## v1.0.3
 
+- Updated dependencies
+
+## v1.0.3
+
 - Fix Job Start timeout
 
 ## v1.0.2
