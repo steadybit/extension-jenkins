@@ -141,3 +141,43 @@ tests:
           content:
             name: SSL_CERT_DIR
             value: /etc/ssl/extra-certs:/etc/ssl/certs
+
+  - it: manifest should match snapshot with custom image registry
+    set:
+      image:
+        registry: my-registry.io
+        name: steadybit/extension-jenkins
+    asserts:
+      - matchSnapshot: {}
+
+  - it: manifest should match snapshot with legacy image name containing registry
+    set:
+      image:
+        name: ghcr.io/steadybit/extension-jenkins
+    asserts:
+      - matchSnapshot: {}
+
+  - it: manifest should match snapshot with global image registry
+    set:
+      global:
+        image:
+          registry: corp-registry.io
+    asserts:
+      - matchSnapshot: {}
+
+  - it: manifest should match snapshot with image pull secrets
+    set:
+      image:
+        pullSecrets:
+          - my-pull-secret
+    asserts:
+      - matchSnapshot: {}
+
+  - it: manifest should match snapshot with global image pull secrets
+    set:
+      global:
+        image:
+          pullSecrets:
+            - global-pull-secret
+    asserts:
+      - matchSnapshot: {}
