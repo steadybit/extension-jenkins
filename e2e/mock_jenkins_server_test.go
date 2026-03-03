@@ -27,32 +27,33 @@ func createMockJenkinsServer() *httptest.Server {
 		Config: &http.Server{
 			Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				log.Info().Str("path", r.URL.Path).Str("method", r.Method).Str("query", r.URL.RawQuery).Msg("Request received")
+				baseURL := fmt.Sprintf("https://%s", r.Host)
 
 				if strings.HasSuffix(r.URL.Path, "/job/my-job/api/json") {
 					w.WriteHeader(http.StatusOK)
-					w.Write(getMyJob())
+					w.Write(getMyJob(baseURL))
 				} else if strings.HasSuffix(r.URL.Path, "/job/Folder/api/json") {
 					w.WriteHeader(http.StatusOK)
-					w.Write(getFolder())
+					w.Write(getFolder(baseURL))
 				} else if strings.HasSuffix(r.URL.Path, "/crumbIssuer/api/json/api/json") {
 					w.WriteHeader(http.StatusOK)
 					w.Write([]byte(`{"_class": "hudson.security.csrf.DefaultCrumbIssuer","crumb": "13749c63e9ed3f7dae947786bb7922dcb9f8609a4aba48089cde33b623ab1dc1","crumbRequestField": "Jenkins-Crumb"}`))
 				} else if strings.HasSuffix(r.URL.Path, "/job/my-job/buildWithParameters") {
 					log.Info().Msg("Return buildWithParameters with Location header")
-					w.Header().Add("Location", "http://host.minikube.internal:8090/queue/item/20/")
+					w.Header().Add("Location", baseURL+"/queue/item/20/")
 					w.WriteHeader(http.StatusOK)
 				} else if strings.HasSuffix(r.URL.Path, "/job/Folder/job/Folder-project/api/json") {
 					w.WriteHeader(http.StatusOK)
-					w.Write(getJobInFolder())
+					w.Write(getJobInFolder(baseURL))
 				} else if strings.HasSuffix(r.URL.Path, "/queue/item/20/api/json") {
 					w.WriteHeader(http.StatusOK)
-					w.Write(getQueueItem())
+					w.Write(getQueueItem(baseURL))
 				} else if strings.HasSuffix(r.URL.Path, "/api/json") && !strings.Contains(r.URL.Path, "/job") {
 					w.WriteHeader(http.StatusOK)
-					w.Write(getRoot())
+					w.Write(getRoot(baseURL))
 				} else if strings.HasSuffix(r.URL.Path, "/job/my-job//9/api/json") {
 					w.WriteHeader(http.StatusOK)
-					w.Write(getBuild())
+					w.Write(getBuild(baseURL))
 				} else {
 					w.WriteHeader(http.StatusBadRequest)
 				}
@@ -69,9 +70,9 @@ func createMockJenkinsServer() *httptest.Server {
 	return &server
 }
 
-func getBuild() []byte {
+func getBuild(baseURL string) []byte {
 	log.Info().Msg("Return build response")
-	return []byte(`{
+	return []byte(fmt.Sprintf(`{
   "_class": "hudson.model.FreeStyleBuild",
   "actions": [
     {
@@ -132,7 +133,7 @@ func getBuild() []byte {
   "queueId": 21,
   "result": "SUCCESS",
   "timestamp": 1749733287152,
-  "url": "http://localhost:8090/job/Example%20Job/9/",
+  "url": "%s/job/my-job/9/",
   "builtOn": "default-zn7ks",
   "changeSet": {
     "_class": "hudson.scm.EmptyChangeLogSet",
@@ -140,12 +141,12 @@ func getBuild() []byte {
     "kind": null
   },
   "culprits": []
-}`)
+}`, baseURL))
 }
 
-func getQueueItem() []byte {
+func getQueueItem(baseURL string) []byte {
 	log.Info().Msg("Return queue item response")
-	return []byte(`{
+	return []byte(fmt.Sprintf(`{
   "_class": "hudson.model.Queue$LeftItem",
   "actions": [
     {
@@ -183,8 +184,8 @@ func getQueueItem() []byte {
   "stuck": false,
   "task": {
     "_class": "hudson.model.FreeStyleProject",
-    "name": "Example Job",
-    "url": "http://localhost:8090/job/Example%20Job/",
+    "name": "my-job",
+    "url": "%s/job/my-job/",
     "color": "blue"
   },
   "url": "queue/item/21/",
@@ -193,14 +194,13 @@ func getQueueItem() []byte {
   "executable": {
     "_class": "hudson.model.FreeStyleBuild",
     "number": 9,
-    "url": "http://localhost:8090/job/Example%20Job/9/"
+    "url": "%s/job/my-job/9/"
   }
-}`)
-
+}`, baseURL, baseURL))
 }
-func getFolder() []byte {
+func getFolder(baseURL string) []byte {
 	log.Info().Msg("Return folder response")
-	return []byte(`{
+	return []byte(fmt.Sprintf(`{
   "_class": "com.cloudbees.hudson.plugins.folder.Folder",
   "actions": [
     {},
@@ -215,34 +215,34 @@ func getFolder() []byte {
   "fullDisplayName": "This is a folder",
   "fullName": "Folder",
   "name": "Folder",
-  "url": "http://jenkins:8080/job/Folder/",
+  "url": "%s/job/Folder/",
   "healthReport": [],
   "jobs": [
     {
       "_class": "hudson.model.FreeStyleProject",
       "name": "Folder-project",
-      "url": "http://jenkins:8080/job/Folder/job/Folder-project/",
+      "url": "%s/job/Folder/job/Folder-project/",
       "color": "notbuilt"
     }
   ],
   "primaryView": {
     "_class": "hudson.model.AllView",
     "name": "All",
-    "url": "http://jenkins:8080/job/Folder/"
+    "url": "%s/job/Folder/"
   },
   "views": [
     {
       "_class": "hudson.model.AllView",
       "name": "All",
-      "url": "http://jenkins:8080/job/Folder/"
+      "url": "%s/job/Folder/"
     }
   ]
-}`)
+}`, baseURL, baseURL, baseURL, baseURL))
 }
 
-func getJobInFolder() []byte {
+func getJobInFolder(baseURL string) []byte {
 	log.Info().Msg("Return project in folder response")
-	return []byte(`{
+	return []byte(fmt.Sprintf(`{
   "_class": "hudson.model.FreeStyleProject",
   "actions": [
     {},
@@ -260,7 +260,7 @@ func getJobInFolder() []byte {
   "fullDisplayName": "This is a folder » Folder-project",
   "fullName": "Folder/Folder-project",
   "name": "Folder-project",
-  "url": "http://jenkins:8080/job/Folder/job/Folder-project/",
+  "url": "%s/job/Folder/job/Folder-project/",
   "buildable": true,
   "builds": [],
   "color": "notbuilt",
@@ -286,12 +286,12 @@ func getJobInFolder() []byte {
     "_class": "hudson.scm.NullSCM"
   },
   "upstreamProjects": []
-}`)
+}`, baseURL))
 }
 
-func getMyJob() []byte {
+func getMyJob(baseURL string) []byte {
 	log.Info().Msg("Return my-job response")
-	return []byte(`{
+	return []byte(fmt.Sprintf(`{
   "_class": "hudson.model.FreeStyleProject",
   "actions": [
     {
@@ -334,7 +334,7 @@ func getMyJob() []byte {
   "fullDisplayName": "my-job",
   "fullName": "my-job",
   "name": "my-job",
-  "url": "http://jenkins:8080/job/my-job/",
+  "url": "%s/job/my-job/",
   "buildable": true,
   "builds": [],
   "color": "red",
@@ -388,12 +388,12 @@ func getMyJob() []byte {
     "_class": "hudson.scm.NullSCM"
   },
   "upstreamProjects": []
-}`)
+}`, baseURL))
 }
 
-func getRoot() []byte {
+func getRoot(baseURL string) []byte {
 	log.Info().Msg("Return root response")
-	return []byte(`{
+	return []byte(fmt.Sprintf(`{
   "_class": "hudson.model.Hudson",
   "assignedLabels": [
     {
@@ -409,20 +409,20 @@ func getRoot() []byte {
     {
       "_class": "hudson.model.FreeStyleProject",
       "name": "my-job",
-      "url": "http://jenkins:8080/job/my-job/",
+      "url": "%s/job/my-job/",
       "color": "red"
     },
     {
       "_class": "com.cloudbees.hudson.plugins.folder.Folder",
       "name": "Folder",
-      "url": "http://jenkins:8080/job/Folder/"
+      "url": "%s/job/Folder/"
     }
   ],
   "overallLoad": {},
   "primaryView": {
     "_class": "hudson.model.AllView",
     "name": "all",
-    "url": "http://jenkins:8080/"
+    "url": "%s/"
   },
   "quietDownReason": null,
   "quietingDown": false,
@@ -430,15 +430,15 @@ func getRoot() []byte {
   "unlabeledLoad": {
     "_class": "jenkins.model.UnlabeledLoadStatistics"
   },
-  "url": "http://jenkins:8080/",
+  "url": "%s/",
   "useCrumbs": true,
   "useSecurity": true,
   "views": [
     {
       "_class": "hudson.model.AllView",
       "name": "all",
-      "url": "http://jenkins:8080/"
+      "url": "%s/"
     }
   ]
-}`)
+}`, baseURL, baseURL, baseURL, baseURL, baseURL))
 }
