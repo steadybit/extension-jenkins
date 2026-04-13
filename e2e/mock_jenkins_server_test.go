@@ -3,11 +3,12 @@ package e2e
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/rs/zerolog/log"
 	"net"
 	"net/http"
 	"net/http/httptest"
 	"strings"
+
+	"github.com/rs/zerolog/log"
 )
 
 func createMockJenkinsServer() *httptest.Server {
@@ -40,7 +41,7 @@ func createMockJenkinsServer() *httptest.Server {
 					w.Write([]byte(`{"_class": "hudson.security.csrf.DefaultCrumbIssuer","crumb": "13749c63e9ed3f7dae947786bb7922dcb9f8609a4aba48089cde33b623ab1dc1","crumbRequestField": "Jenkins-Crumb"}`))
 				} else if strings.HasSuffix(r.URL.Path, "/job/my-job/buildWithParameters") {
 					log.Info().Msg("Return buildWithParameters with Location header")
-					w.Header().Add("Location", baseURL+"/queue/item/20/")
+					w.Header().Add("Location", baseURL+"/queue/item/20/") //NOSONAR gosecurity:S5146
 					w.WriteHeader(http.StatusOK)
 				} else if strings.HasSuffix(r.URL.Path, "/job/Folder/job/Folder-project/api/json") {
 					w.WriteHeader(http.StatusOK)
