@@ -73,7 +73,7 @@ func createMockJenkinsServer() *httptest.Server {
 
 func getBuild(baseURL string) []byte {
 	log.Info().Msg("Return build response")
-	return []byte(fmt.Sprintf(`{
+	return fmt.Appendf(nil, `{
   "_class": "hudson.model.FreeStyleBuild",
   "actions": [
     {
@@ -142,12 +142,12 @@ func getBuild(baseURL string) []byte {
     "kind": null
   },
   "culprits": []
-}`, baseURL))
+}`, baseURL)
 }
 
 func getQueueItem(baseURL string) []byte {
 	log.Info().Msg("Return queue item response")
-	return []byte(fmt.Sprintf(`{
+	return fmt.Appendf(nil, `{
   "_class": "hudson.model.Queue$LeftItem",
   "actions": [
     {
@@ -197,11 +197,11 @@ func getQueueItem(baseURL string) []byte {
     "number": 9,
     "url": "%s/job/my-job/9/"
   }
-}`, baseURL, baseURL))
+}`, baseURL, baseURL)
 }
 func getFolder(baseURL string) []byte {
 	log.Info().Msg("Return folder response")
-	return []byte(fmt.Sprintf(`{
+	return fmt.Appendf(nil, `{
   "_class": "com.cloudbees.hudson.plugins.folder.Folder",
   "actions": [
     {},
@@ -238,12 +238,12 @@ func getFolder(baseURL string) []byte {
       "url": "%s/job/Folder/"
     }
   ]
-}`, baseURL, baseURL, baseURL, baseURL))
+}`, baseURL, baseURL, baseURL, baseURL)
 }
 
 func getJobInFolder(baseURL string) []byte {
 	log.Info().Msg("Return project in folder response")
-	return []byte(fmt.Sprintf(`{
+	return fmt.Appendf(nil, `{
   "_class": "hudson.model.FreeStyleProject",
   "actions": [
     {},
@@ -287,12 +287,12 @@ func getJobInFolder(baseURL string) []byte {
     "_class": "hudson.scm.NullSCM"
   },
   "upstreamProjects": []
-}`, baseURL))
+}`, baseURL)
 }
 
 func getMyJob(baseURL string) []byte {
 	log.Info().Msg("Return my-job response")
-	return []byte(fmt.Sprintf(`{
+	return fmt.Appendf(nil, `{
   "_class": "hudson.model.FreeStyleProject",
   "actions": [
     {
@@ -389,12 +389,12 @@ func getMyJob(baseURL string) []byte {
     "_class": "hudson.scm.NullSCM"
   },
   "upstreamProjects": []
-}`, baseURL))
+}`, baseURL)
 }
 
 func getRoot(baseURL string) []byte {
 	log.Info().Msg("Return root response")
-	return []byte(fmt.Sprintf(`{
+	return fmt.Appendf(nil, `{
   "_class": "hudson.model.Hudson",
   "assignedLabels": [
     {
@@ -441,5 +441,5 @@ func getRoot(baseURL string) []byte {
       "url": "%s/"
     }
   ]
-}`, baseURL, baseURL, baseURL, baseURL, baseURL))
+}`, baseURL, baseURL, baseURL, baseURL, baseURL)
 }
