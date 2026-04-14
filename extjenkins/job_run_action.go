@@ -15,6 +15,7 @@ import (
 	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
+	"slices"
 	"strings"
 	"time"
 )
@@ -57,10 +58,10 @@ func (l *jobRunAction) Describe() action_kit_api.ActionDescription {
 		Label:       "Run Jenkins Job",
 		Description: "Starts a Jenkins job.",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:        extutil.Ptr(TargetIconJob),
-		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+		Icon:        new(TargetIconJob),
+		TargetSelection: new(action_kit_api.TargetSelection{
 			TargetType: TargetTypeJob,
-			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+			SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label: "job name",
 					Query: "jenkins.job.name=\"\"",
@@ -68,39 +69,39 @@ func (l *jobRunAction) Describe() action_kit_api.ActionDescription {
 			}),
 			QuantityRestriction: extutil.Ptr(action_kit_api.QuantityRestrictionExactlyOne),
 		}),
-		Technology:  extutil.Ptr("Jenkins"),
+		Technology:  new("Jenkins"),
 		Kind:        action_kit_api.Other,
 		TimeControl: action_kit_api.TimeControlInternal,
 		Parameters: []action_kit_api.ActionParameter{
 			{
 				Name:         "duration",
 				Label:        "Estimated Duration",
-				Description:  extutil.Ptr("If `Wait for Completion` is checked, the step will run as long as needed. You can set this estimation to size the step in the experiment editor for a better understanding of the time schedule."),
+				Description:  new("If `Wait for Completion` is checked, the step will run as long as needed. You can set this estimation to size the step in the experiment editor for a better understanding of the time schedule."),
 				Type:         action_kit_api.ActionParameterTypeDuration,
-				DefaultValue: extutil.Ptr("60s"),
-				Required:     extutil.Ptr(true),
+				DefaultValue: new("60s"),
+				Required:     new(true),
 			},
 			{
 				Name:         "waitForCompletion",
 				Label:        "Wait for Completion",
-				Description:  extutil.Ptr("If enabled, the action will wait for the job to complete before returning. If disabled, the action will return immediately after starting the job."),
+				Description:  new("If enabled, the action will wait for the job to complete before returning. If disabled, the action will return immediately after starting the job."),
 				Type:         action_kit_api.ActionParameterTypeBoolean,
-				DefaultValue: extutil.Ptr("true"),
-				Required:     extutil.Ptr(true),
+				DefaultValue: new("true"),
+				Required:     new(true),
 			},
 			{
 				Name:        "parameters",
 				Label:       "Parameters",
-				Description: extutil.Ptr("Optional parameters to pass to the job."),
+				Description: new("Optional parameters to pass to the job."),
 				Type:        action_kit_api.ActionParameterTypeKeyValue,
-				Required:    extutil.Ptr(false),
+				Required:    new(false),
 			},
 		},
-		Status: extutil.Ptr(action_kit_api.MutatingEndpointReferenceWithCallInterval{
-			CallInterval: extutil.Ptr("2s"),
+		Status: new(action_kit_api.MutatingEndpointReferenceWithCallInterval{
+			CallInterval: new("2s"),
 		}),
-		Stop: extutil.Ptr(action_kit_api.MutatingEndpointReference{}),
-		Widgets: extutil.Ptr([]action_kit_api.Widget{
+		Stop: new(action_kit_api.MutatingEndpointReference{}),
+		Widgets: new([]action_kit_api.Widget{
 			action_kit_api.MarkdownWidget{
 				Type:        action_kit_api.ComSteadybitWidgetMarkdown,
 				Title:       "Jenkins",
@@ -130,20 +131,14 @@ func (l *jobRunAction) Prepare(_ context.Context, state *JobRunActionState, requ
 				Messages: &[]action_kit_api.Message{
 					{
 						Message: "- ⚠️ This job does not have any parameters defined, but parameters were provided.",
-						Type:    extutil.Ptr("JENKINS"),
+						Type:    new("JENKINS"),
 					},
 				},
 			}, nil
 		}
 		missingParameters := []string{}
 		for key := range state.Parameters {
-			found := false
-			for _, param := range availableParameters {
-				if key == param {
-					found = true
-					break
-				}
-			}
+			found := slices.Contains(availableParameters, key)
 			if !found {
 				missingParameters = append(missingParameters, key)
 			}
@@ -153,7 +148,7 @@ func (l *jobRunAction) Prepare(_ context.Context, state *JobRunActionState, requ
 				Messages: &[]action_kit_api.Message{
 					{
 						Message: fmt.Sprintf("- ⚠️ The following parameters are not defined for this job: %s", strings.Join(missingParameters, ", ")),
-						Type:    extutil.Ptr("JENKINS"),
+						Type:    new("JENKINS"),
 					},
 				},
 			}, nil
@@ -192,7 +187,7 @@ func (l *jobRunAction) Start(ctx context.Context, state *JobRunActionState) (*ac
 		Messages: &[]action_kit_api.Message{
 			{
 				Message: "- Waiting for job to start...",
-				Type:    extutil.Ptr("JENKINS"),
+				Type:    new("JENKINS"),
 			},
 		},
 	}
@@ -230,7 +225,7 @@ func (l *jobRunAction) Status(ctx context.Context, state *JobRunActionState) (*a
 					Messages: &[]action_kit_api.Message{
 						{
 							Message: fmt.Sprintf("- Job started, action will not wait for completion. [Build](%s) [Console](%sconsole)", build.Raw.URL, build.Raw.URL),
-							Type:    extutil.Ptr("JENKINS"),
+							Type:    new("JENKINS"),
 						},
 					},
 				}, nil
@@ -241,7 +236,7 @@ func (l *jobRunAction) Status(ctx context.Context, state *JobRunActionState) (*a
 					Messages: &[]action_kit_api.Message{
 						{
 							Message: fmt.Sprintf("- Job started. [Open](%s) [Console](%sconsole)", build.Raw.URL, build.Raw.URL),
-							Type:    extutil.Ptr("JENKINS"),
+							Type:    new("JENKINS"),
 						},
 					},
 				}, nil
@@ -260,12 +255,12 @@ func (l *jobRunAction) Status(ctx context.Context, state *JobRunActionState) (*a
 				}
 				messages = append(messages, action_kit_api.Message{
 					Message: fmt.Sprintf("- Job ended with result '%s' ⚠️", build.Raw.Result),
-					Type:    extutil.Ptr("JENKINS"),
+					Type:    new("JENKINS"),
 				})
 			} else {
 				messages = append(messages, action_kit_api.Message{
 					Message: fmt.Sprintf("- Job ended with result '%s' ✅", build.Raw.Result),
-					Type:    extutil.Ptr("JENKINS"),
+					Type:    new("JENKINS"),
 				})
 			}
 			return &action_kit_api.StatusResult{
@@ -276,9 +271,9 @@ func (l *jobRunAction) Status(ctx context.Context, state *JobRunActionState) (*a
 		}
 	} else {
 		if time.Since(referenceTime) > state.TimeoutOffset {
-			return extutil.Ptr(action_kit_api.StatusResult{
+			return new(action_kit_api.StatusResult{
 				Completed: true,
-				Error: extutil.Ptr(action_kit_api.ActionKitError{
+				Error: new(action_kit_api.ActionKitError{
 					Title:  "Timed out waiting for job to start.",
 					Status: extutil.Ptr(action_kit_api.Errored),
 				}),
@@ -327,7 +322,7 @@ func (l *jobRunAction) Stop(ctx context.Context, state *JobRunActionState) (*act
 			log.Info().Msg("Job stopped.")
 			messages = append(messages, action_kit_api.Message{
 				Message: "- Job stopped. 🛑",
-				Type:    extutil.Ptr("JENKINS"),
+				Type:    new("JENKINS"),
 			})
 		}
 	}

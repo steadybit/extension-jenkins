@@ -11,7 +11,6 @@ import (
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_test/validate"
 	"github.com/steadybit/extension-kit/extlogging"
-	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"strings"
@@ -96,7 +95,7 @@ func testRunJob(t *testing.T, m *e2e.Minikube, e *e2e.Extension) {
 	}{
 		WaitForCompletion: true,
 	}
-	context := &action_kit_api.ExecutionContext{ExperimentKey: extutil.Ptr("ADM-1"), ExecutionId: extutil.Ptr(4711)}
+	context := &action_kit_api.ExecutionContext{ExperimentKey: new("ADM-1"), ExecutionId: new(4711)}
 	exec, err := e.RunAction("com.steadybit.extension_jenkins.job.run", target, config, context)
 	require.NoError(t, err)
 	e2e.AssertLogContainsWithTimeout(t, m, e.Pod, "Job queued successfully.", 60*time.Second)

@@ -9,7 +9,6 @@ import (
 	"github.com/steadybit/extension-jenkins/config"
 	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/extutil"
 	"time"
 )
 
@@ -34,7 +33,7 @@ func (d *jobDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
 		Id: TargetTypeJob,
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
-			CallInterval: extutil.Ptr("1m"),
+			CallInterval: new("1m"),
 		},
 	}
 }
@@ -43,11 +42,11 @@ func (d *jobDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:      TargetTypeJob,
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:    extutil.Ptr(TargetIconJob),
+		Icon:    new(TargetIconJob),
 
 		Label: discovery_kit_api.PluralLabel{One: "Jenkins Job", Other: "Jenkins Jobs"},
 
-		Category: extutil.Ptr("Jenkins"),
+		Category: new("Jenkins"),
 
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
