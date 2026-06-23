@@ -2,7 +2,6 @@
 
 ## v1.0.15
 
-- build: rename workflow_dispatch input labels for the GH UI
 
 ## v1.0.14
 
