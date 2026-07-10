@@ -8,7 +8,6 @@ import (
 	"context"
 	"crypto/tls"
 	"net/http"
-	"time"
 
 	_ "github.com/KimMachineGun/automemlimit" // By default, it sets `GOMEMLIMIT` to 90% of cgroup's memory limit.
 	"github.com/bndr/gojenkins"
@@ -28,8 +27,6 @@ import (
 	"github.com/steadybit/extension-kit/extsignals"
 	_ "go.uber.org/automaxprocs" // Importing automaxprocs automatically adjusts GOMAXPROCS.
 )
-
-var startedAt = time.Now().Format(time.RFC3339)
 
 func main() {
 	extlogging.InitZeroLog()
@@ -65,7 +62,7 @@ func main() {
 	discovery_kit_sdk.Register(extjenkins.NewJobDiscovery(jenkins))
 	action_kit_sdk.RegisterAction(extjenkins.NewJobRunAction(jenkins))
 
-	exthttp.RegisterHttpHandler("/", exthttp.IfNoneMatchHandler(func() string { return startedAt }, exthttp.GetterAsHandler(getExtensionList)))
+	exthttp.RegisterRevisionedHandler("/", getExtensionList)
 
 	extsignals.ActivateSignalHandlers()
 
