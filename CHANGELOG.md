@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.0.16
+
+- chore(deps): bump github.com/steadybit/action-kit/go/action_kit_sdk
+- chore(deps): bump github.com/steadybit/discovery-kit/go/discovery_kit_sdk
+- chore(deps): bump github.com/steadybit/extension-kit
+- chore(deps): bump go to 1.26.5 (#35)
+- chore: add Claude Code workflows (#31)
+- chore: silence SonarQube finding on secrets: inherit in Claude workflows
+- refactor: register extension index via exthttp.RegisterRevisionedHandler (#36)
+
 ## v1.0.15
 
 
