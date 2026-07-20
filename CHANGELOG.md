@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.17
+
+- ci: skip build on .trivyignore.yml-only changes [skip ci]
+
 ## v1.0.16
 
 - chore(deps): bump github.com/steadybit/action-kit/go/action_kit_sdk
