@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.20
+
+- chore(deps): bump github.com/stretchr/testify from 1.11.1 to 1.12.0
+- chore(deps): bump steadybit kits and drop Go patch pin (#38)
+- chore(deps): bump steadybit kits and drop Go patch pin (#39)
+
 ## v1.0.19
 
 - feat: support filtering targets out of discovery
