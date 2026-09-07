@@ -11,6 +11,35 @@ entries:
         - name: Steadybit reliability hub
           url: https://hub.steadybit.com
     apiVersion: v2
+    appVersion: v1.0.22
+    created: "2026-09-07T06:16:22.42667297Z"
+    dependencies:
+    - name: extensionlib
+      repository: https://steadybit.github.io/helm-charts
+      version: ^1.5.4
+    description: Steadybit jenkins extension Helm chart for Kubernetes.
+    digest: 64f0e78668de34e3ec66110f4f67d55b8f6914645b57a229702ea397f40bd52f
+    home: https://www.steadybit.com/
+    icon: https://steadybit-website-assets.s3.amazonaws.com/logo-symbol-transparent.png
+    maintainers:
+    - email: daniel.reuter@steadybit.com
+      name: reuda
+    name: steadybit-extension-jenkins
+    sources:
+    - https://github.com/steadybit/extension-jenkins
+    urls:
+    - https://github.com/steadybit/extension-jenkins/releases/download/steadybit-extension-jenkins-1.0.27/steadybit-extension-jenkins-1.0.27.tgz
+    version: 1.0.27
+  - annotations:
+      artifacthub.io/images: |
+        - name: logo
+          image: https://steadybit-website-assets.s3.amazonaws.com/logo-symbol-transparent.png
+      artifacthub.io/links: |-
+        - name: Steadybit website
+          url: https://www.steadybit.com
+        - name: Steadybit reliability hub
+          url: https://hub.steadybit.com
+    apiVersion: v2
     appVersion: v1.0.21
     created: "2026-08-31T06:14:28.312036961Z"
     dependencies:
@@ -842,4 +871,4 @@ entries:
     urls:
     - https://github.com/steadybit/extension-jenkins/releases/download/steadybit-extension-jenkins-0.0.1/steadybit-extension-jenkins-0.0.1.tgz
     version: 0.0.1
-generated: "2026-08-31T06:14:28.312229635Z"
+generated: "2026-09-07T06:16:22.426916077Z"
