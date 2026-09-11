@@ -3,7 +3,7 @@ module github.com/steadybit/extension-jenkins
 go 1.26.0
 
 require (
-	github.com/KimMachineGun/automemlimit v0.7.5
+	github.com/KimMachineGun/automemlimit v1.0.0
 	github.com/bndr/gojenkins v1.2.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/rs/zerolog v1.35.1
