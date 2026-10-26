@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.27
+
+- chore(deps): bump github.com/KimMachineGun/automemlimit
+- chore(deps): bump github.com/steadybit/action-kit/go/action_kit_test
+- chore(deps): bump github.com/steadybit/extension-kit
+
 ## v1.0.26
 
 - chore(deps): bump golang.org/x/net to v0.61.0
