@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.30
+
+- chore(deps): bump github.com/steadybit/discovery-kit/go/discovery_kit_sdk
+
 ## v1.0.29
 
 - chore(deps): bump golang.org/x/net to v0.62.0
